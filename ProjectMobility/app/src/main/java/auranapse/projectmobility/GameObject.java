@@ -20,7 +20,9 @@ public class GameObject
 
     public void Update(final float delta_time)
     {
-
+        Pos_X +=  Vel_X * delta_time;
+        Pos_X +=  Vel_Y * delta_time;
+        UpdateBox();
     }
 
     public void UpdateBox()

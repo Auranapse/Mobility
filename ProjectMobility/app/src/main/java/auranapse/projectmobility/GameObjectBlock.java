@@ -6,26 +6,28 @@ package auranapse.projectmobility;
 public class GameObjectBlock extends GameObject
 {
     private GameObject main_char_;
-    private int score_;
+    private Score score_;
     private boolean havent_scored_;
 
-    public GameObjectBlock(GameObject main_char, int score)
+    public GameObjectBlock(GameObject main_char, Score score)
     {
-        havent_scored_ = false;
+        havent_scored_ = true;
         main_char_ = main_char;
         score_ = score;
     }
 
     public void Update(final float delta_time)
     {
+        super.Update(delta_time);
+
         if(CheckIfScored())
         {
-            ++score_;
+            score_.Increment();
         }
     }
     public boolean CheckIfScored()
     {
-        if(main_char_.Pos_X < Pos_X && havent_scored_)
+        if(main_char_.Pos_X > Pos_X && havent_scored_)
         {
             havent_scored_ = false;
             return true;

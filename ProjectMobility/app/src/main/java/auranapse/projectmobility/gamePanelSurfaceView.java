@@ -25,14 +25,15 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
     }
     Random randomGenerator = new Random();
     // Implement this interface to receive information about changes to the surface.
-    float score = 0.f;
+    Score score_ = new Score();
 
     private gameThread myThread = null; // Thread to control the rendering
 
+    //private float world_width_, world_height_;
     // 1a) Variables used for background rendering
     private Bitmap bg, scaledbg;
     // 1b) Define Screen width and Screen height as integer
-    int ScreenWidth, ScreenHeight;
+    private int ScreenWidth, ScreenHeight;
     // 1c) Variables for defining background start and end point
     private short bgX = 0, bgY = 0;
     // 4a) bitmap array to stores 4 images of the spaceship
@@ -40,20 +41,20 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
     // 4b) Variable as an index to keep track of the spaceship images
 
     // Variables for FPS
-    public float FPS;
-    float deltaTime;
-    long dt;
+    private float FPS;
+    private float deltaTime;
+    private long dt;
 
-    float countdown_to_next_spawn = 0;
+    private float countdown_to_next_spawn = 0;
 
     // Variable for Game State check
     private GAMESTATE GameState = GAMESTATE.PLAY;
 
-    Paint paint = new Paint();
+    private Paint paint = new Paint();
 
     private short TOUCHPOS_X = 0, TOUCHPOS_Y = 0, DRAGDELTA_X, DRAGDELTA_Y;
 
-    GameObject MAN_CHAR = new GameObject();
+    private GameObject MAN_CHAR = new GameObject();
 
     Vector<GameObject> GO_list = new Vector<GameObject>();
 
@@ -91,7 +92,7 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
 
     public void init()
     {
-        score = 0.f;
+        score_.Reset();
 
         GameState = GAMESTATE.PLAY;
         GO_list.clear();
@@ -152,7 +153,7 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         int temp = randomGenerator.nextInt(BM_block.getHeight()/4);
 
 
-        GameObject GO = new GameObject();
+        GameObject GO = new GameObjectBlock(MAN_CHAR, score_);
         GO.Pos_X = ScreenWidth + BM_block.getWidth();
         GO.Pos_Y = ScreenHeight - temp;
         GO.Vel_X = -120.f;
@@ -195,7 +196,7 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         paint.setStrokeWidth(100);
         paint.setTextSize(25);
         canvas.drawText("FPS: " + FPS, 130, 60, paint);
-        canvas.drawText("Score: " + score, 130, 80, paint);
+        canvas.drawText("Score: " + score_.Num(), 130, 80, paint);
     }
 
     //Update method to update the game play
@@ -211,7 +212,6 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         {
             case PLAY:
             {
-                score += dt;
                 countdown_to_next_spawn -= dt;
 
                 bgX -= 100 * dt;
@@ -234,12 +234,11 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
 
                 for (int i = 0; i < GO_list.size(); ++i)
                 {
-                    GO_list.get(i).Pos_X +=  GO_list.get(i).Vel_X * dt;
-                    GO_list.get(i).Pos_X +=  GO_list.get(i).Vel_Y * dt;
+                    GameObject obj = GO_list.get(i);
 
-                    GO_list.get(i).UpdateBox();
+                    obj.Update(dt);
 
-                    if(GameObject.checkCollision(GO_list.get(i), MAN_CHAR))
+                    if(GameObject.checkCollision(obj, MAN_CHAR))
                     {
                         MAN_CHAR.Pos_Y = ScreenHeight/2;
                         MAN_CHAR.Vel_Y = 0;
