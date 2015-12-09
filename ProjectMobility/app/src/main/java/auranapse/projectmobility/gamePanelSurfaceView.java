@@ -10,6 +10,7 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import java.util.Random;
 import java.util.Vector;
 
 /**
@@ -17,6 +18,12 @@ import java.util.Vector;
  */
 public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 {
+    enum GAMESTATE
+    {
+        PLAY,
+        DEATH,
+    }
+    Random randomGenerator = new Random();
     // Implement this interface to receive information about changes to the surface.
     float score = 0.f;
 
@@ -37,15 +44,18 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
     float deltaTime;
     long dt;
 
+    float countdown_to_next_spawn = 0;
+
     // Variable for Game State check
-    private short GameState = 0;
+    private GAMESTATE GameState = GAMESTATE.PLAY;
 
     Paint paint = new Paint();
 
     private short TOUCHPOS_X = 0, TOUCHPOS_Y = 0, DRAGDELTA_X, DRAGDELTA_Y;
 
     GameObject MAN_CHAR = new GameObject();
-    Vector<GameObject> GO_list;
+
+    Vector<GameObject> GO_list = new Vector<GameObject>();
 
     //constructor for this GamePanelSurfaceView class
     public gamePanelSurfaceView (Context context)
@@ -67,15 +77,10 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
 
         // 4c) Load the images of the spaceships
         BM_man = BitmapFactory.decodeResource(getResources(), R.drawable.man);
-        BM_man = Bitmap.createScaledBitmap(BM_man, 400, 200, true);
+        BM_man = Bitmap.createScaledBitmap(BM_man, (int)(ScreenWidth/4.5), (int)((ScreenWidth/4.5)/2), true);
 
         BM_block = BitmapFactory.decodeResource(getResources(), R.drawable.button);
-        BM_block = Bitmap.createScaledBitmap(BM_block, 100, 800, true);
-
-        score = 0.f;
-
-        MAN_CHAR.COL_X = 400;
-        MAN_CHAR.COL_Y = 100;
+        BM_block = Bitmap.createScaledBitmap(BM_block, (int)(ScreenWidth/19), (int)(ScreenWidth/19)*8, true);
 
         // Create the game loop thread
         myThread = new gameThread(getHolder(), this);
@@ -83,6 +88,21 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         // Make the GamePanel focusable so it can handle events
         setFocusable(true);
     }
+
+    public void init()
+    {
+        score = 0.f;
+
+        GameState = GAMESTATE.PLAY;
+        GO_list.clear();
+
+        MAN_CHAR.COL_X = (int)(BM_man.getWidth()*0.45);
+        MAN_CHAR.COL_Y = (int)(BM_man.getHeight()*0.185);
+        MAN_CHAR.Pos_X = 200;
+        MAN_CHAR.Pos_Y = ScreenHeight/2;
+        MAN_CHAR.Vel_Y = 0;
+    }
+
 
     //must implement inherited abstract methods
     public void surfaceCreated(SurfaceHolder holder)
@@ -124,6 +144,33 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
 
     }
 
+    public void generateBlocks()
+    {
+        countdown_to_next_spawn = randomGenerator.nextInt(7) + 3;
+        float gap = BM_block.getWidth()*2.6f;
+
+        int temp = randomGenerator.nextInt(BM_block.getHeight()/4);
+
+
+        GameObject GO = new GameObject();
+        GO.Pos_X = ScreenWidth + BM_block.getWidth();
+        GO.Pos_Y = ScreenHeight - temp;
+        GO.Vel_X = -120.f;
+        GO.Vel_Y = 0;
+        GO.COL_X = BM_block.getWidth()/2;
+        GO.COL_Y = BM_block.getHeight()/2;
+        GO_list.add(GO);
+
+        GO = new GameObject();
+        GO.Pos_X = ScreenWidth + BM_block.getWidth();
+        GO.Pos_Y = ScreenHeight - temp - gap - BM_block.getHeight();
+        GO.Vel_X = -120.f;
+        GO.Vel_Y = 0;
+        GO.COL_X = BM_block.getWidth()/2;
+        GO.COL_Y = BM_block.getHeight()/2;
+        GO_list.add(GO);
+    }
+
     public void RenderGameplay(Canvas canvas)
     {
         // 2) Re-draw 2nd image after the 1st image ends
@@ -137,27 +184,23 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         // 4d) Draw the spaceships
         canvas.drawBitmap(BM_man, MAN_CHAR.Pos_X - (int)(BM_man.getWidth()*0.5), MAN_CHAR.Pos_Y - (int)(BM_man.getHeight()*0.5), null);
 
-        for (int i = 0; i < 10; ++i)
+        for (int i = 0; i < GO_list.size(); ++i)
         {
-                canvas.drawBitmap(BM_block, 20 - (int)(BM_block.getWidth()*0.5), 20 - (int)(BM_block.getHeight()*0.5), null);
+                canvas.drawBitmap(BM_block, GO_list.get(i).Pos_X - (int)(BM_block.getWidth()*0.5), GO_list.get(i).Pos_Y - (int)(BM_block.getHeight()*0.5), null);
         }
-        //
-
 
         // Bonus) To print FPS on the screen
         Paint paint = new Paint();
         paint.setARGB(255, 0, 0, 0);
         paint.setStrokeWidth(100);
-        paint.setTextSize(30);
-        canvas.drawText("FPS: " + FPS, 130, 75, paint);
+        paint.setTextSize(25);
+        canvas.drawText("FPS: " + FPS, 130, 60, paint);
+        canvas.drawText("Score: " + score, 130, 80, paint);
     }
-
 
     //Update method to update the game play
     public void update(float dt, float fps)
     {
-        score += dt;
-
         if(dt > 0.5)
         {
             dt = 0.f;
@@ -166,19 +209,48 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
 
         switch (GameState)
         {
-            case 0:
+            case PLAY:
             {
-                bgX -= 400 * dt;
+                score += dt;
+                countdown_to_next_spawn -= dt;
+
+                bgX -= 100 * dt;
                 if(bgX < -ScreenWidth)
                 {
                     bgX = 0;
                 }
-                // 3) Update the background to allow panning effect
 
-                MAN_CHAR.Vel_Y += 250 * dt;
+                if(countdown_to_next_spawn < 0)
+                {
+                    generateBlocks();
+                }
+
+                MAN_CHAR.Vel_Y += 275 * dt;
 
                 MAN_CHAR.Pos_X += MAN_CHAR.Vel_X * dt;
                 MAN_CHAR.Pos_Y += MAN_CHAR.Vel_Y * dt;
+
+                MAN_CHAR.UpdateBox();
+
+                for (int i = 0; i < GO_list.size(); ++i)
+                {
+                    GO_list.get(i).Pos_X +=  GO_list.get(i).Vel_X * dt;
+                    GO_list.get(i).Pos_X +=  GO_list.get(i).Vel_Y * dt;
+
+                    GO_list.get(i).UpdateBox();
+
+                    if(GameObject.checkCollision(GO_list.get(i), MAN_CHAR))
+                    {
+                        MAN_CHAR.Pos_Y = ScreenHeight/2;
+                        MAN_CHAR.Vel_Y = 0;
+                        GameState = GAMESTATE.DEATH;
+                    }
+                }
+            }
+            break;
+            case DEATH:
+            {
+
             }
             break;
         }
@@ -189,8 +261,11 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
     {
         switch (GameState)
         {
-            case 0:
+            case PLAY:
                 RenderGameplay(canvas);
+                break;
+            case DEATH:
+
                 break;
         }
     }
@@ -203,9 +278,20 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         // 5) In event of touch on screen, the spaceship will relocate to the point of touch
         if(event.getAction() == MotionEvent.ACTION_DOWN)
         {
-            //CHAR_POS_X = X;
-            //CHAR_POS_Y = Y;
-            MAN_CHAR.Vel_Y = -200;
+            switch (GameState)
+            {
+                case PLAY:
+                {
+                    MAN_CHAR.Vel_Y = -200;
+                }
+                break;
+                case DEATH:
+                {
+                    init();
+                }
+                break;
+            }
+
         }
 
         return super.onTouchEvent(event);
