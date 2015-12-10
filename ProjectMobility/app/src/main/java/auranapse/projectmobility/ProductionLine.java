@@ -15,7 +15,7 @@ public class ProductionLine<ProductType>
         {
             if(product.IsDestroyed())
             {
-                return product.Create();
+                return (ProductType)product.Create();
             }
         }
         return null;

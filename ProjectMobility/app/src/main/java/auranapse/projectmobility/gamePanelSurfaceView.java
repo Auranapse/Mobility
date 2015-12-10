@@ -31,7 +31,7 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
 
     //private float world_width_, world_height_;
     // 1a) Variables used for background rendering
-    private Bitmap bg, scaledbg;
+    private Bitmap bg, scaledbg, BM_rip;
     // 1b) Define Screen width and Screen height as integer
     private int ScreenWidth, ScreenHeight;
     // 1c) Variables for defining background start and end point
@@ -73,12 +73,14 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         ScreenHeight = metrics.heightPixels;
         // 1e)load the image when this class is being instantiated
         bg = BitmapFactory.decodeResource(getResources(), R.drawable.gamescene);
-
         scaledbg = Bitmap.createScaledBitmap(bg, ScreenWidth, ScreenHeight, true);
+
+        BM_rip = BitmapFactory.decodeResource(getResources(), R.drawable.rip);
+        BM_rip = Bitmap.createScaledBitmap(BM_rip, ScreenWidth, ScreenHeight, true);
 
         // 4c) Load the images of the spaceships
         BM_man = BitmapFactory.decodeResource(getResources(), R.drawable.man);
-        BM_man = Bitmap.createScaledBitmap(BM_man, (int)(ScreenWidth/4.5), (int)((ScreenWidth/4.5)/2), true);
+        BM_man = Bitmap.createScaledBitmap(BM_man, (int)(ScreenWidth/5.5), (int)((ScreenWidth/5.5)/2), true);
 
         BM_block = BitmapFactory.decodeResource(getResources(), R.drawable.button);
         BM_block = Bitmap.createScaledBitmap(BM_block, (int)(ScreenWidth/19), (int)(ScreenWidth/19)*8, true);
@@ -97,8 +99,8 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         GameState = GAMESTATE.PLAY;
         GO_list.clear();
 
-        MAN_CHAR.COL_X = (int)(BM_man.getWidth()*0.45);
-        MAN_CHAR.COL_Y = (int)(BM_man.getHeight()*0.185);
+        MAN_CHAR.COL_X = (int)(BM_man.getWidth()*0.3);
+        MAN_CHAR.COL_Y = (int)(BM_man.getHeight()*0.45);
         MAN_CHAR.Pos_X = 200;
         MAN_CHAR.Pos_Y = ScreenHeight/2;
         MAN_CHAR.Vel_Y = 0;
@@ -150,10 +152,11 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         countdown_to_next_spawn = randomGenerator.nextInt(7) + 3;
         float gap = BM_block.getWidth()*2.6f;
 
-        int temp = randomGenerator.nextInt(BM_block.getHeight()/4);
+        int temp = randomGenerator.nextInt(BM_block.getHeight()/3);
 
 
-        GameObject GO = new GameObjectBlock(MAN_CHAR, score_);
+        GameObjectBlock GO = new GameObjectBlock();
+        GO.Set(MAN_CHAR, score_);
         GO.Pos_X = ScreenWidth + BM_block.getWidth();
         GO.Pos_Y = ScreenHeight - temp;
         GO.Vel_X = -120.f;
@@ -162,14 +165,14 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         GO.COL_Y = BM_block.getHeight()/2;
         GO_list.add(GO);
 
-        GO = new GameObject();
-        GO.Pos_X = ScreenWidth + BM_block.getWidth();
-        GO.Pos_Y = ScreenHeight - temp - gap - BM_block.getHeight();
-        GO.Vel_X = -120.f;
-        GO.Vel_Y = 0;
-        GO.COL_X = BM_block.getWidth()/2;
-        GO.COL_Y = BM_block.getHeight()/2;
-        GO_list.add(GO);
+        GameObject GO1 = new GameObject();
+        GO1.Pos_X = ScreenWidth + BM_block.getWidth();
+        GO1.Pos_Y = ScreenHeight - temp - gap - BM_block.getHeight();
+        GO1.Vel_X = -120.f;
+        GO1.Vel_Y = 0;
+        GO1.COL_X = BM_block.getWidth()/2;
+        GO1.COL_Y = BM_block.getHeight()/2;
+        GO_list.add(GO1);
     }
 
     public void RenderGameplay(Canvas canvas)
@@ -192,7 +195,7 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
 
         // Bonus) To print FPS on the screen
         Paint paint = new Paint();
-        paint.setARGB(255, 0, 0, 0);
+        paint.setARGB(255, 255, 255, 255);
         paint.setStrokeWidth(100);
         paint.setTextSize(25);
         canvas.drawText("FPS: " + FPS, 130, 60, paint);
@@ -232,6 +235,11 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
 
                 MAN_CHAR.UpdateBox();
 
+                if(MAN_CHAR.Pos_Y > ScreenHeight)
+                {
+                    GameState = GAMESTATE.DEATH;
+                }
+
                 for (int i = 0; i < GO_list.size(); ++i)
                 {
                     GameObject obj = GO_list.get(i);
@@ -243,6 +251,12 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
                         MAN_CHAR.Pos_Y = ScreenHeight/2;
                         MAN_CHAR.Vel_Y = 0;
                         GameState = GAMESTATE.DEATH;
+                    }
+
+                    if(obj.Pos_X < 0 - BM_block.getWidth())
+                    {
+                        GO_list.remove(i);
+                        --i;
                     }
                 }
             }
@@ -264,7 +278,13 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
                 RenderGameplay(canvas);
                 break;
             case DEATH:
+                canvas.drawBitmap(BM_rip, 0, 0, null);
 
+                Paint paint = new Paint();
+                paint.setARGB(255, 255, 255, 255);
+                paint.setStrokeWidth(100);
+                paint.setTextSize(40);
+                canvas.drawText("Score: " + score_.Num(), ScreenWidth/2, ScreenHeight/2, paint);
                 break;
         }
     }

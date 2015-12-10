@@ -9,7 +9,11 @@ public class GameObjectBlock extends GameObject
     private Score score_;
     private boolean havent_scored_;
 
-    public GameObjectBlock(GameObject main_char, Score score)
+    public GameObjectBlock()
+    {
+    }
+
+    public void Set(GameObject main_char, Score score)
     {
         havent_scored_ = true;
         main_char_ = main_char;

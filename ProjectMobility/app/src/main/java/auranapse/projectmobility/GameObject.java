@@ -3,7 +3,7 @@ package auranapse.projectmobility;
 /**
  * Created by Gabriel Wong on 09-Dec-15.
  */
-public class GameObject
+public class GameObject implements Product
 {
     float Vel_X = 0, Vel_Y = 0;
     float Pos_X = 0, Pos_Y = 0;
@@ -12,6 +12,18 @@ public class GameObject
     int COLOFF_X = 0, COLOFF_Y = 0;
 
     AABBBox box = new AABBBox();
+
+    boolean active = true;
+
+    public Product Create()
+    {
+        active = true;
+        return this;
+    }
+    public boolean IsDestroyed()
+    {
+        return !active;
+    }
 
     public static boolean checkCollision(GameObject GO1, GameObject GO2)
     {
