@@ -31,7 +31,7 @@ public class GameObjectBlock extends GameObject
     }
     public boolean CheckIfScored()
     {
-        if(main_char_.position_.x_ > main_char_.position_.x_ && havent_scored_)
+        if(main_char_.position_.x_ > position_.x_ && havent_scored_)
         {
             havent_scored_ = false;
             return true;

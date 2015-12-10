@@ -40,9 +40,7 @@ public class GameObjectMoney extends GameObject
         {
             distance_from_main_character.Copy(main_character_.position_).Subtract(position_);
 
-            normal_velocity_.Copy(distance_from_main_character);
-
-            normal_velocity_.Normalise().Multiply(speed_);
+            normal_velocity_.Add((distance_from_main_character).Normalise().Multiply(speed_).Multiply(delta_time));
 
             velocity_.Copy(normal_velocity_);
         }

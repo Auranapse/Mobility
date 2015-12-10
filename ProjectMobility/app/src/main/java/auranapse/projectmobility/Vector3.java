@@ -11,12 +11,12 @@ public class Vector3
 
     public double Length()
     {
-        return Math.sqrt(x_ * x_ * y_ * y_ * z_ * z_);
+        return Math.sqrt(LengthSquared());
     }
 
     public double LengthSquared()
     {
-        return x_ * x_ * y_ * y_ * z_ * z_;
+        return x_ * x_ + y_ * y_ + z_ * z_;
     }
 
     public Vector3 Normalise()
