@@ -9,10 +9,6 @@ public class Vector3
     public double y_ = 0;
     public double z_ = 0;
 
-    public Vector3()
-    {
-    }
-
     public double Length()
     {
         return Math.sqrt(x_ * x_ * y_ * y_ * z_ * z_);
@@ -33,6 +29,30 @@ public class Vector3
         x_ *= multiply;
         y_ *= multiply;
         z_ *= multiply;
+        return this;
+    }
+
+    public Vector3 Add(final Vector3 vector)
+    {
+        x_ += vector.x_;
+        y_ += vector.y_;
+        z_ += vector.z_;
+        return this;
+    }
+
+    public Vector3 Subtract(final Vector3 vector)
+    {
+        x_ -= vector.x_;
+        y_ -= vector.y_;
+        z_ -= vector.z_;
+        return this;
+    }
+
+    public Vector3 Copy(final Vector3 vector)
+    {
+        x_ = vector.x_;
+        y_ = vector.y_;
+        z_ = vector.z_;
         return this;
     }
 }

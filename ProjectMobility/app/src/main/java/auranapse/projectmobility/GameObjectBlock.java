@@ -20,7 +20,7 @@ public class GameObjectBlock extends GameObject
         score_ = score;
     }
 
-    public void Update(final float delta_time)
+    public void Update(final double delta_time)
     {
         super.Update(delta_time);
 
@@ -31,7 +31,7 @@ public class GameObjectBlock extends GameObject
     }
     public boolean CheckIfScored()
     {
-        if(main_char_.Pos_X > Pos_X && havent_scored_)
+        if(main_char_.position_.x_ > main_char_.position_.x_ && havent_scored_)
         {
             havent_scored_ = false;
             return true;

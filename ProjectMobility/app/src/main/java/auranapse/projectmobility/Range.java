@@ -5,13 +5,13 @@ package auranapse.projectmobility;
  */
 public class Range
 {
-    public float start_;
-    public float end_;
+    public double start_;
+    public double end_;
 
     public Range()
     {
-        start_ = 0;
-        end_ = 0;
+        start_ = 0.0;
+        end_ = 0.0;
     }
     public Range(float start, float end)
     {

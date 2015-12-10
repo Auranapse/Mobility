@@ -20,6 +20,6 @@ public class gameScene extends Activity
 
         gamePanelSurfaceView a = new gamePanelSurfaceView(this);
         setContentView(a);
-        a.init();
+        a.Init();
     }
 }

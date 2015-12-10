@@ -9,105 +9,79 @@ import android.view.SurfaceHolder;
 public class gameThread extends Thread
 {
     // The actual view that handles inputs and draws to the surface
-    private gamePanelSurfaceView myView;
+    private gamePanelSurfaceView my_view_ = null;
 
     // Surface holder that can access the physical surface
-    private SurfaceHolder holder;
+    private SurfaceHolder holder_ = null;
 
     // Flag to hold game state
-    private boolean isRun;
+    private boolean is_running_ = false;
 
-    private boolean isPause;
+    private boolean is_paused_ = false;
 
-    // get actual fps
-    int frameCount;
-    long lastTime = 0;
-    long lastFPSTime = 0;
-    float fps;
-    float dt;
-
-    // Constructor for this class
-    public gameThread(SurfaceHolder holder, gamePanelSurfaceView myView)
+    public void Init(SurfaceHolder holder, gamePanelSurfaceView my_view)
     {
-        super();
-        isRun = true; // for running
-        isPause = false; // for pause
-        this.myView = myView;
-        this.holder = holder;
+        is_running_ = true;
+        my_view_ = my_view;
+        holder_ = holder;
     }
 
-    public void startRun(boolean r)
+    public void Exit()
     {
-        isRun = r;
+        is_running_ = false;
     }
 
-    public void pause()
+    public void Pause()
     {
-        synchronized (holder)
+        synchronized (holder_)
         {
-            isPause = true;
+            is_paused_ = true;
         }
     }
 
-    public void unPause()
+    public void Unpause()
     {
-        synchronized (holder)
+        synchronized (holder_)
         {
-            isPause = false;
-            holder.notifyAll();
+            is_paused_ = false;
+            holder_.notifyAll();
         }
     }
 
     //Return Pause
-    public boolean getPause()
+    public boolean IsPaused()
     {
-        return isPause;
-    }
-
-    public void calculateFPS()
-    {
-        frameCount++;
-
-        long currentTime = System.currentTimeMillis();
-        dt = (currentTime - lastTime) / 1000.f;
-        lastTime = currentTime;
-
-        if(currentTime - lastFPSTime > 1000)
-        {
-            fps = (frameCount * 1000.f) / (currentTime - lastFPSTime);
-            lastFPSTime = currentTime;
-            frameCount = 0;
-        }
+        return is_paused_;
     }
 
     @Override
     public void run()
     {
-        while (isRun)
+        while (is_running_)
         {
             //Update game state and render state to the screen
             Canvas c = null;
             try
             {
-                c = this.holder.lockCanvas();
-                synchronized(holder)
+                c = this.holder_.lockCanvas();
+                synchronized(holder_)
                 {
-                    if (myView != null)
+                    if (my_view_ != null)
                     {
-                        if (getPause() == false)
+                        if (!is_paused_)
                         {
-                            myView.update(dt, fps);
-                            myView.doDraw(c);
+                            my_view_.Update(System.currentTimeMillis());
+                            my_view_.Render(c);
                         }
                     }
                 }
-                synchronized(holder)
+                synchronized(holder_)
                 {
-                    while (getPause()==true)
+                    while (is_paused_)
                     {
                         try
                         {
-                            holder.wait();
+                            holder_.wait();
                         }
                         catch (InterruptedException e)
                         {
@@ -121,10 +95,9 @@ public class gameThread extends Thread
             {
                 if (c!=null)
                 {
-                    holder.unlockCanvasAndPost(c);
+                    holder_.unlockCanvasAndPost(c);
                 }
             }
-            calculateFPS();
         }
 
     }

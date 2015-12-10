@@ -5,24 +5,25 @@ import java.util.Vector;
 /**
  * Created by mrlol on 10-Dec-15.
  */
-public class ProductionLine<ProductType>
+public class ProductionLine
 {
-    public ProductType GetProduct()
+    private Vector<Product> products_ = new Vector<>();
+
+    public Product GetProduct()
     {
         for(Product product : products_)
         {
             if(product.IsDestroyed())
             {
-                return (ProductType)product.Create();
+                return product.Create();
             }
         }
         return null;
     }
-    public ProductType AddProduct(Product new_product)
+
+    public Product AddProduct(Product new_product)
     {
         products_.add(new_product);
-        return (ProductType)new_product;
+        return new_product;
     }
-
-    private Vector<Product> products_ = new Vector<>();
 }
