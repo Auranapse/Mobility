@@ -1,7 +1,5 @@
 package auranapse.projectmobility;
 
-import android.util.Pair;
-
 import java.util.Vector;
 
 /**
@@ -26,6 +24,5 @@ public class ProductionLine<ProductType>
         return (ProductType)new_product;
     }
 
-    private
-    Vector<Product> products_ = new Vector<>();
+    private Vector<Product> products_ = new Vector<>();
 }
