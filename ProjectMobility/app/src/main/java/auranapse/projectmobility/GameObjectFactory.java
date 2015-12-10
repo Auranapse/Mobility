@@ -5,4 +5,16 @@ package auranapse.projectmobility;
  */
 public class GameObjectFactory
 {
+    ProductionLine block_production_ = new ProductionLine();
+
+    public GameObject GetBlock(GameObject main_character, Score score)
+    {
+        Product product = block_production_.GetProduct();
+        if(product == null)
+        {
+            block_production_.AddProduct(product = new GameObjectBlock(main_character, score));
+        }
+        product.Set(main_character, score);
+        return product;
+    }
 }
