@@ -38,6 +38,7 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
     private short bgX = 0, bgY = 0;
     // 4a) bitmap array to stores 4 images of the spaceship
     private Bitmap BM_man, BM_block;
+    private Bitmap BM_monies;
     // 4b) Variable as an index to keep track of the spaceship images
 
     // Variables for FPS
@@ -80,10 +81,13 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
 
         // 4c) Load the images of the spaceships
         BM_man = BitmapFactory.decodeResource(getResources(), R.drawable.man);
-        BM_man = Bitmap.createScaledBitmap(BM_man, (int)(ScreenWidth/5.5), (int)((ScreenWidth/5.5)/2), true);
+        BM_man = Bitmap.createScaledBitmap(BM_man, (int) (ScreenWidth / 5.5), (int) ((ScreenWidth / 5.5) / 2), true);
 
-        BM_block = BitmapFactory.decodeResource(getResources(), R.drawable.button);
-        BM_block = Bitmap.createScaledBitmap(BM_block, (int)(ScreenWidth/19), (int)(ScreenWidth/19)*8, true);
+        BM_monies = BitmapFactory.decodeResource(getResources(), R.drawable.monies);
+        BM_monies = Bitmap.createScaledBitmap(BM_monies, (int) (ScreenWidth / 5.5), (int) ((ScreenWidth / 5.5) / 2), true);
+
+        BM_block = BitmapFactory.decodeResource(getResources(), R.drawable.slot_machine);
+        BM_block = Bitmap.createScaledBitmap(BM_block, (int)(ScreenWidth/7), (int)((ScreenWidth/7)*1.6), true);
 
         // Create the game loop thread
         myThread = new gameThread(getHolder(), this);
@@ -150,7 +154,7 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
     public void generateBlocks()
     {
         countdown_to_next_spawn = randomGenerator.nextInt(7) + 3;
-        float gap = BM_block.getWidth()*2.6f;
+        float gap = BM_block.getWidth()*1.2f;
 
         int temp = randomGenerator.nextInt(BM_block.getHeight()/3);
 
@@ -186,6 +190,7 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         canvas.drawBitmap(scaledbg, bgX, bgY, null);
         canvas.drawBitmap(scaledbg, bgX + ScreenWidth, bgY, null);
         // 4d) Draw the spaceships
+        canvas.drawBitmap(BM_monies, MAN_CHAR.Pos_X - (int)(BM_man.getWidth()*0.5), MAN_CHAR.Pos_Y - (int)(BM_man.getHeight()*0.5), null);
         canvas.drawBitmap(BM_man, MAN_CHAR.Pos_X - (int)(BM_man.getWidth()*0.5), MAN_CHAR.Pos_Y - (int)(BM_man.getHeight()*0.5), null);
 
         for (int i = 0; i < GO_list.size(); ++i)
@@ -284,7 +289,9 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
                 paint.setARGB(255, 255, 255, 255);
                 paint.setStrokeWidth(100);
                 paint.setTextSize(40);
-                canvas.drawText("Score: " + score_.Num(), ScreenWidth/2, ScreenHeight/2, paint);
+
+                canvas.drawText("Gameover, you lost your money", ScreenWidth/2 - 300, ScreenHeight/2 - 50, paint);
+                canvas.drawText("Score: " + score_.Num(), ScreenWidth/2 - 300, ScreenHeight/2, paint);
                 break;
         }
     }
