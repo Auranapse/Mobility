@@ -3,8 +3,8 @@ package auranapse.projectmobility;
 /**
  * Created by mrlol on 10-Dec-15.
  */
-public abstract class Product
+public interface Product
 {
-    abstract Product Create();
-    abstract boolean IsDestroyed();
+    Product Create();
+    boolean IsDestroyed();
 }

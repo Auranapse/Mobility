@@ -7,9 +7,9 @@ import java.util.Vector;
 /**
  * Created by mrlol on 10-Dec-15.
  */
-public class ProductionLine
+public class ProductionLine<ProductType>
 {
-    public Product GetProduct()
+    public ProductType GetProduct()
     {
         for(Product product : products_)
         {
@@ -20,10 +20,10 @@ public class ProductionLine
         }
         return null;
     }
-    public Product AddProduct(Product new_product)
+    public ProductType AddProduct(Product new_product)
     {
         products_.add(new_product);
-        return new_product;
+        return (ProductType)new_product;
     }
 
     private
