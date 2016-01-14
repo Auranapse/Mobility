@@ -1,6 +1,8 @@
 package auranapse.projectmobility;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -9,6 +11,10 @@ import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 
 import java.util.Random;
 import java.util.Vector;
@@ -16,8 +22,25 @@ import java.util.Vector;
 /**
  * Created by 143476L on 11/25/2015.
  */
-public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.Callback
+public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.Callback, SensorEventListener
 {
+    private final SensorManager sensor;
+
+    private float[] f_Accelerometer = {0, 0, 0};
+    private long lastTime = System.currentTimeMillis();
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy)
+    {
+
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent SenseEvent)
+    {
+        f_Accelerometer = SenseEvent.values;
+    }
+
     enum GAMESTATE
     {
         PLAY,
@@ -68,6 +91,13 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
     Vector<GameObject> game_object_list_ = new Vector<>();
     Vector<GameObjectMoney> monies_list_ = new Vector<>();
 
+    public void SensorMove()
+    {
+        float tempX, tempY;
+        tempX = (f_Accelerometer[1] * ((System.currentTimeMillis() - lastTime)/1000));
+        tempY = (f_Accelerometer[0] * ((System.currentTimeMillis() - lastTime)/1000));
+    }
+
     //constructor for this GamePanelSurfaceView class
     public gamePanelSurfaceView (Context context)
     {
@@ -76,6 +106,9 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
 
         // Adding the callback (this) to the surface holder to intercept events
         getHolder().addCallback(this);
+
+        sensor = (SensorManager)getContext().getSystemService(Context.SENSOR_SERVICE);
+        sensor.registerListener(this, sensor.getSensorList(Sensor.TYPE_ACCELEROMETER).get(0), SensorManager.SENSOR_DELAY_NORMAL);
 
         // 1d) Set information to get screen size
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
@@ -333,6 +366,9 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         {
             canvas.drawBitmap(bitmap_invulnerability_, (int) (main_character_.position_.x_ - bitmap_invulnerability_.getWidth() * 0.5), (int) (main_character_.position_.y_ - bitmap_invulnerability_.getHeight() * 0.5), null);
         }
+
+        canvas.drawBitmap(bitmap_invulnerability_, (int) (f_Accelerometer[1] - bitmap_invulnerability_.getWidth() * 0.5), (int) (f_Accelerometer[0] - bitmap_invulnerability_.getHeight() * 0.5), null);
+
 
         for (GameObject object : game_object_list_)
         {
