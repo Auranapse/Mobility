@@ -7,6 +7,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.SoundPool;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -91,6 +94,11 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
     Vector<GameObject> game_object_list_ = new Vector<>();
     Vector<GameObjectMoney> monies_list_ = new Vector<>();
 
+    //Audio
+    MediaPlayer AUDIO_BACKGROUNDMUSIC;
+    private SoundPool AUDIO_SOUNDS;
+    private int AUDIO_FLY, AUDIO_CASINO;
+
     public void SensorMove()
     {
         float tempX, tempY;
@@ -142,6 +150,13 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         {
             monies_list_.add(new GameObjectMoney());
         }
+
+        AUDIO_BACKGROUNDMUSIC = MediaPlayer.create(context, R.raw.bgm);
+        AUDIO_BACKGROUNDMUSIC.setVolume(0.6f, 0.6f);
+        AUDIO_BACKGROUNDMUSIC.start();
+        AUDIO_SOUNDS = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);
+        AUDIO_CASINO = AUDIO_SOUNDS.load(context, R.raw.casino, 1);
+        AUDIO_FLY = AUDIO_SOUNDS.load(context, R.raw.fly, 1);
     }
 
     public void UpdateFrameInformation(final long current_time)
@@ -278,7 +293,7 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
                     if (GameObject.checkCollision(object, main_character_))
                     {
                         current_invulnerability_ = invulnerability_;
-
+                        AUDIO_SOUNDS.play(AUDIO_CASINO, 1.0f, 1.0f, 0, 0, 1);
                         --current_num_monies_;
                         monies_list_.get(current_num_monies_).ReactToCollision();
                         if (current_num_monies_ == 0)
@@ -367,7 +382,7 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
             canvas.drawBitmap(bitmap_invulnerability_, (int) (main_character_.position_.x_ - bitmap_invulnerability_.getWidth() * 0.5), (int) (main_character_.position_.y_ - bitmap_invulnerability_.getHeight() * 0.5), null);
         }
 
-        canvas.drawBitmap(bitmap_invulnerability_, (int) (f_Accelerometer[1] - bitmap_invulnerability_.getWidth() * 0.5), (int) (f_Accelerometer[0] - bitmap_invulnerability_.getHeight() * 0.5), null);
+        //canvas.drawBitmap(bitmap_invulnerability_, (int) (f_Accelerometer[1] - bitmap_invulnerability_.getWidth() * 0.5), (int) (f_Accelerometer[0] - bitmap_invulnerability_.getHeight() * 0.5), null);
 
 
         for (GameObject object : game_object_list_)
@@ -397,6 +412,11 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
 
     public void surfaceDestroyed(SurfaceHolder holder)
     {
+        AUDIO_SOUNDS.unload(AUDIO_FLY);
+        AUDIO_SOUNDS.unload(AUDIO_CASINO);
+        AUDIO_BACKGROUNDMUSIC.stop();
+        AUDIO_BACKGROUNDMUSIC.release();
+
         // Destroy the thread
         if (my_thread_.isAlive())
         {
@@ -434,11 +454,18 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
             {
                 case PLAY:
                 {
-                    main_character_.velocity_.y_ = -200;
+                    AUDIO_SOUNDS.play(AUDIO_FLY, 2.0f, 2.0f, 0, 0, 1.0f);
+                    if(main_character_.velocity_.y_ > 0)
+                    {
+                        main_character_.velocity_.y_ = -200;
+                    }
+                    else
+                    {
+                        main_character_.velocity_.y_ += -100;
+                    }
                 }
                 break;
-                case DEATH:
-                {
+                case DEATH: {
                     Init();
                 }
                 break;
