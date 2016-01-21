@@ -73,6 +73,8 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
     private long last_fps_update_ = 0;
     private double fps_ = 0.0;
     private double delta_time_ = 0.0;
+    private double speed_multiplier = 1.0;
+    private int score_to_increase = 5;
 
     //spawner information
     private double countdown_to_next_spawn_ = 0.0;
@@ -242,7 +244,7 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         {
             case PLAY:
             {
-                countdown_to_next_spawn_ -= delta_time_;
+                countdown_to_next_spawn_ -= delta_time_ * speed_multiplier;
 
                 bgX -= 100 * delta_time_;
                 if (bgX < -screen_width_) {
@@ -275,9 +277,15 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
                     current_invulnerability_ -= delta_time_;
                 }
 
+                if(score_to_increase == score_.Num() % score_to_increase + 1)
+                {
+                    score_to_increase += 5;
+                    speed_multiplier += 0.5;
+                }
+
                 for (GameObject object : game_object_list_)
                 {
-                    object.Update(delta_time_);
+                    object.Update(delta_time_ * speed_multiplier);
 
                     if (object.position_.x_ < 0 - bitmap_block_.getWidth())
                     {
