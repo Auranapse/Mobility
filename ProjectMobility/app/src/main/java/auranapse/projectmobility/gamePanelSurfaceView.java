@@ -51,9 +51,16 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         TOTAL
     }
 
+    private SharedPreferences preferenceSettings;
+    private SharedPreferences.Editor preferenceEditor;
+    private static final int PREFERENCE_MODE_PRIVATE = 0;
+
+
     Random random_generator_ = new Random();
     // Implement this interface to receive information about changes to the surface.
     Score score_ = new Score();
+    int i_highscore;
+
 
     private gameThread my_thread_ = new gameThread(); // Thread to control the rendering
 
@@ -159,6 +166,14 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         AUDIO_SOUNDS = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);
         AUDIO_CASINO = AUDIO_SOUNDS.load(context, R.raw.casino, 1);
         AUDIO_FLY = AUDIO_SOUNDS.load(context, R.raw.fly, 1);
+
+        preferenceSettings = context.getSharedPreferences("GAME", PREFERENCE_MODE_PRIVATE);
+        preferenceEditor = preferenceSettings.edit();
+
+
+        i_highscore = preferenceSettings.getInt("G_HIGHSCORE", 0);
+
+        preferenceEditor.commit();
     }
 
     public void UpdateFrameInformation(final long current_time)
@@ -317,6 +332,11 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
             break;
             case DEATH:
             {
+                if(score_.Num() > i_highscore)
+                {
+                    i_highscore = score_.Num();
+                    preferenceEditor.putInt("G_HIGHSCORE", i_highscore);
+                }
                 if(countdown_to_next_spawn_ > 0)
                 {
                     countdown_to_next_spawn_ -= delta_time_;
@@ -369,6 +389,7 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
 
                 canvas.drawText("Gameover, you lost your money", screen_width_/2 - 300, screen_height_/2 - 50, paint);
                 canvas.drawText("Score: " + score_.Num(), screen_width_/2 - 300, screen_height_/2, paint);
+                canvas.drawText("Highscore: " + i_highscore, screen_width_/2 - 300, screen_height_/2 + 50, paint);
                 break;
             }
         }
@@ -405,6 +426,7 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         paint.setTextSize(25);
         canvas.drawText("FPS: " + fps_, 130, 60, paint);
         canvas.drawText("Score: " + score_.Num(), 130, 80, paint);
+        canvas.drawText("Highscore: " + i_highscore, 130, 100, paint);
     }
 
     //must implement inherited abstract methods
@@ -420,6 +442,7 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
 
     public void surfaceDestroyed(SurfaceHolder holder)
     {
+        preferenceEditor.commit();
         AUDIO_SOUNDS.unload(AUDIO_FLY);
         AUDIO_SOUNDS.unload(AUDIO_CASINO);
         AUDIO_BACKGROUNDMUSIC.stop();
