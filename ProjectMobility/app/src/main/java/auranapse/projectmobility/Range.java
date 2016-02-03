@@ -19,8 +19,12 @@ public class Range
         this.end_ = end;
     }
 
-    public boolean IsOverlapping(Range range)
+    public final boolean IsOverlapping(Range range)
     {
         return start_ <= range.end_ && end_ >= range.start_;
+    }
+    public final double GetLength()
+    {
+        return start_ - end_;
     }
 }

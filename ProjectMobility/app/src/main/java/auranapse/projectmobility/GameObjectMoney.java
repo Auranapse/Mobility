@@ -22,13 +22,6 @@ public class GameObjectMoney extends GameObject
         speed_ = speed;
     }
 
-    public Product Create()
-    {
-        super.Create();
-        fly_ = false;
-        return this;
-    }
-
     public void Update(double delta_time)
     {
         super.Update(delta_time);

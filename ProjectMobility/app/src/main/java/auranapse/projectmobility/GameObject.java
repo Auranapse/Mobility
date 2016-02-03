@@ -3,7 +3,7 @@ package auranapse.projectmobility;
 /**
  * Created by Gabriel Wong on 09-Dec-15.
  */
-public class GameObject implements Product
+public class GameObject
 {
     public Vector3 velocity_ = new Vector3();
     public Vector3 position_ = new Vector3();
@@ -16,16 +16,7 @@ public class GameObject implements Product
 
     boolean active = true;
 
-    public Product Create()
-    {
-        active = true;
-        return this;
-    }
 
-    public void Destroy()
-    {
-        active = false;
-    }
 
     public boolean IsDestroyed()
     {
