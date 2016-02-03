@@ -46,7 +46,10 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
 
     enum GAMESTATE
     {
+        SPLASH,
+        MENU,
         PLAY,
+        PAUSED,
         DEATH,
         TOTAL
     }
@@ -71,7 +74,7 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
     //Variables for defining background start and end point
     private short bgX = 0, bgY = 0;
 
-    Bitmap bitmap_background_, bitmap_rip_, bitmap_main_character_, bitmap_block_, bitmap_monies_, bitmap_invulnerability_;
+    Bitmap bitmap_background_, bitmap_rip_, bitmap_main_character_, bitmap_block_, bitmap_monies_, bitmap_invulnerability_, bitmap_splash_, bitmap_menu_;
 
     // frame_information
     private int frame_count_ = 0;
@@ -82,6 +85,7 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
     private double delta_time_ = 0.0;
     private double speed_multiplier = 1.0;
     private int score_to_increase = 5;
+    private float timer_ = 0.f;
 
     //spawner information
     private double countdown_to_next_spawn_ = 0.0;
@@ -90,13 +94,28 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
     private double current_invulnerability_ = 0.0;
 
     // Variable for Game State check
-    private GAMESTATE game_state_ = GAMESTATE.PLAY;
+    private GAMESTATE game_state_ = GAMESTATE.SPLASH;
 
     private Paint paint_ = new Paint();
 
     //private short touch_position_x_ = 0, touch_position_y_ = 0, drag_delta_x_, drag_delta_y_;
 
     private GameObject main_character_ = new GameObject();
+
+    private GameObject button_Play_ = new GameObject();
+    Bitmap bitmap_button_Play_;
+
+    private GameObject button_Menu_ = new GameObject();
+    Bitmap bitmap_button_Menu_;
+
+    private GameObject button_Retry_ = new GameObject();
+    Bitmap bitmap_button_Retry_;
+
+    private GameObject button_Pause_ = new GameObject();
+    Bitmap bitmap_button_Pause_;
+
+    private GameObject clickymouse_ = new GameObject();
+
 
     final int num_monies_ = 5;
     int current_num_monies_ = 0;
@@ -133,24 +152,149 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         screen_height_ = metrics.heightPixels;
         // 1e)load the image when this class is being instantiated
         Bitmap bitmap;
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inSampleSize = 2;
 
-        bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.gamescene);
+        bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.gamescene, options);
         bitmap_background_ = Bitmap.createScaledBitmap(bitmap, screen_width_, screen_height_, true);
 
-        bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.rip);
+        if(bitmap != null)
+        {
+            bitmap.recycle();
+            bitmap = null;
+        }
+
+        bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.splash);
+        bitmap_splash_ = Bitmap.createScaledBitmap(bitmap, screen_width_, screen_height_, true);
+
+        if(bitmap != null)
+        {
+            bitmap.recycle();
+            bitmap = null;
+        }
+
+        bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.background, options);
+        bitmap_menu_ = Bitmap.createScaledBitmap(bitmap, screen_width_, screen_height_, true);
+
+        if(bitmap != null)
+        {
+            bitmap.recycle();
+            bitmap = null;
+        }
+
+        bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.rip, options);
         bitmap_rip_ = Bitmap.createScaledBitmap(bitmap, screen_width_, screen_height_, true);
 
-        bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.man);
+        if(bitmap != null)
+        {
+            bitmap.recycle();
+            bitmap = null;
+        }
+        bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.man, options);
         bitmap_main_character_ = Bitmap.createScaledBitmap(bitmap, (int) (screen_width_ / 5.5), (int) ((screen_width_ / 5.5) / 2), true);
 
-        bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.monies);
+        if(bitmap != null)
+        {
+            bitmap.recycle();
+            bitmap = null;
+        }
+
+        bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.monies, options);
         bitmap_monies_ = Bitmap.createScaledBitmap(bitmap, (int) (screen_width_ / 5.5), (int) ((screen_width_ / 5.5) / 2), true);
 
-        bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.slot_machine);
+        if(bitmap != null)
+        {
+            bitmap.recycle();
+            bitmap = null;
+        }
+
+        bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.slot_machine, options);
         bitmap_block_ = Bitmap.createScaledBitmap(bitmap, (int)(screen_width_/7.0), (int)((screen_width_/7)*1.6), true);
 
-        bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.invulnerability);
+        if(bitmap != null)
+        {
+            bitmap.recycle();
+            bitmap = null;
+        }
+
+        bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.invulnerability, options);
         bitmap_invulnerability_ = Bitmap.createScaledBitmap(bitmap, (int)(screen_width_/5.5), (int)(screen_width_ / 5.5), true);
+
+        if(bitmap != null)
+        {
+            bitmap.recycle();
+            bitmap = null;
+        }
+//
+        bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.button_play, options);
+        bitmap_button_Play_ = Bitmap.createScaledBitmap(bitmap, (int)(screen_width_/94*20), (int)(screen_width_ /256*20), true);
+
+        if(bitmap != null)
+        {
+            bitmap.recycle();
+            bitmap = null;
+        }
+//
+        button_Play_.collision_box_size_.x_ = (int)(bitmap_button_Play_.getWidth()*0.5);
+        button_Play_.collision_box_size_.y_ = (int)(bitmap_button_Play_.getHeight()*0.5);
+        button_Play_.position_.x_ = screen_width_*0.5;
+        button_Play_.position_.y_ = screen_height_*0.5;
+        button_Play_.UpdateBox();
+
+
+        bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.button_menu, options);
+        bitmap_button_Menu_ = Bitmap.createScaledBitmap(bitmap, (int)(screen_width_/94*15), (int)(screen_width_ /256*15), true);
+
+        if(bitmap != null)
+        {
+            bitmap.recycle();
+            bitmap = null;
+        }
+
+        button_Menu_.collision_box_size_.x_ = (int)(bitmap_button_Menu_.getWidth()*0.5);
+        button_Menu_.collision_box_size_.y_ = (int)(bitmap_button_Menu_.getHeight()*0.5);
+        button_Menu_.position_.x_ = screen_width_*0.25;
+        button_Menu_.position_.y_ = screen_height_*0.8;
+        button_Menu_.UpdateBox();
+
+//
+        bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.button_retry, options);
+        bitmap_button_Retry_ = Bitmap.createScaledBitmap(bitmap, (int)(screen_width_/94*15), (int)(screen_width_ /256*15), true);
+
+        if(bitmap != null)
+        {
+            bitmap.recycle();
+            bitmap = null;
+        }
+
+        button_Retry_.collision_box_size_.x_ = (int)(bitmap_button_Retry_.getWidth()*0.5);
+        button_Retry_.collision_box_size_.y_ = (int)(bitmap_button_Retry_.getHeight()*0.5);
+        button_Retry_.position_.x_ = screen_width_*0.75;
+        button_Retry_.position_.y_ = screen_height_*0.8;
+        button_Retry_.UpdateBox();
+
+//
+        options.inDither = false;
+        bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.button_pause, options);
+        bitmap_button_Pause_ = Bitmap.createScaledBitmap(bitmap, (int)(screen_width_/25), (int)(screen_width_ /25), true);
+
+        if(bitmap != null)
+        {
+            bitmap.recycle();
+            bitmap = null;
+        }
+
+        button_Pause_.collision_box_size_.x_ = (int)(bitmap_button_Pause_.getWidth()*0.5);
+        button_Pause_.collision_box_size_.y_ = (int)(bitmap_button_Pause_.getHeight()*0.5);
+        button_Pause_.position_.x_ = screen_width_*0.9;
+        button_Pause_.position_.y_ = screen_height_*0.1;
+        button_Pause_.UpdateBox();
+
+
+        clickymouse_.collision_box_size_.x_ = 0.1;
+        clickymouse_.collision_box_size_.y_ = 0.1;
+        clickymouse_.position_.x_ = 0;
+        clickymouse_.position_.y_ = 0;
 
         // Make the GamePanel focusable so it can handle events
         setFocusable(true);
@@ -174,6 +318,8 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         i_highscore = preferenceSettings.getInt("G_HIGHSCORE", 0);
 
         preferenceEditor.commit();
+
+        game_state_ = GAMESTATE.SPLASH;
     }
 
     public void UpdateFrameInformation(final long current_time)
@@ -195,8 +341,6 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
     public void Init()
     {
         score_.Reset();
-
-        game_state_ = GAMESTATE.PLAY;
         game_object_list_.clear();
 
         main_character_.collision_box_size_.x_ = (int)(bitmap_main_character_.getWidth()*0.3);
@@ -257,6 +401,27 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
 
         switch (game_state_)
         {
+            case SPLASH:
+            {
+                if(timer_ > 3)
+                {
+                    game_state_ = GAMESTATE.MENU;
+                }
+                else
+                {
+                    timer_ += delta_time_;
+                }
+            }
+            break;
+            case MENU:
+            {
+                if(GameObject.checkCollision(button_Play_, clickymouse_))
+                {
+                    game_state_ = GAMESTATE.PLAY;
+                    Init();
+                }
+            }
+            break;
             case PLAY:
             {
                 countdown_to_next_spawn_ -= delta_time_ * speed_multiplier;
@@ -328,6 +493,11 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
                         }
                     }
                 }
+
+                if(GameObject.checkCollision(button_Pause_, clickymouse_))
+                {
+                    game_state_ = GAMESTATE.PAUSED;
+                }
             }
             break;
             case DEATH:
@@ -353,9 +523,23 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
                         break;
                     }
                 }
+
+                if(GameObject.checkCollision(button_Retry_, clickymouse_))
+                {
+                    game_state_ = GAMESTATE.PLAY;
+                    Init();
+                }
+                else if(GameObject.checkCollision(button_Menu_, clickymouse_))
+                {
+                    game_state_ = GAMESTATE.MENU;
+                }
             }
             break;
         }
+
+        clickymouse_.UpdateBox();
+        clickymouse_.position_.x_ = 0;
+        clickymouse_.position_.y_ = 0;
     }
 
     // Rendering is done on Canvas
@@ -368,14 +552,37 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
 
         switch (game_state_)
         {
+            case SPLASH:
+            {
+                canvas.drawBitmap(bitmap_splash_, 0, 0, null);
+            }
+            break;
+            case MENU:
+            {
+                canvas.drawBitmap(bitmap_menu_, 0, 0, null);
+                canvas.drawBitmap(bitmap_button_Play_, (int)(button_Play_.position_.x_ - bitmap_button_Play_.getWidth()*0.5), (int)(button_Play_.position_.y_ - bitmap_button_Play_.getHeight()*0.5), null);
+            }
+            break;
             case PLAY:
             {
                 RenderGameplay(canvas);
+                canvas.drawBitmap(bitmap_button_Pause_, (int) (button_Pause_.position_.x_ - bitmap_button_Pause_.getWidth() * 0.5), (int) (button_Pause_.position_.y_ - bitmap_button_Pause_.getHeight() * 0.5), null);
                 break;
             }
+            case PAUSED:
+            {
+                Paint paint = new Paint();
+                paint.setARGB(255, 255, 255, 255);
+                paint.setStrokeWidth(100);
+                paint.setTextSize(40);
+
+                RenderGameplay(canvas);
+                canvas.drawText("Paused", screen_width_ / 2 - 100, screen_height_ / 2, paint);
+            }
+            break;
             case DEATH:
             {
-                canvas.drawBitmap(bitmap_rip_, 0, 0, null);
+                canvas.drawBitmap(bitmap_menu_, 0, 0, null);
 
                 for(GameObjectMoney munny : monies_list_)
                 {
@@ -387,9 +594,12 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
                 paint.setStrokeWidth(100);
                 paint.setTextSize(40);
 
-                canvas.drawText("Gameover, you lost your money", screen_width_/2 - 300, screen_height_/2 - 50, paint);
+                canvas.drawText("Gameover, you lost your money", screen_width_ / 2 - 300, screen_height_ / 2 - 50, paint);
                 canvas.drawText("Score: " + score_.Num(), screen_width_/2 - 300, screen_height_/2, paint);
                 canvas.drawText("Highscore: " + i_highscore, screen_width_/2 - 300, screen_height_/2 + 50, paint);
+
+                canvas.drawBitmap(bitmap_button_Menu_, (int) (button_Menu_.position_.x_ - bitmap_button_Menu_.getWidth() * 0.5), (int) (button_Menu_.position_.y_ - bitmap_button_Menu_.getHeight() * 0.5), null);
+                canvas.drawBitmap(bitmap_button_Retry_, (int) (button_Retry_.position_.x_ - bitmap_button_Retry_.getWidth() * 0.5), (int) (button_Retry_.position_.y_ - bitmap_button_Retry_.getHeight() * 0.5), null);
                 break;
             }
         }
@@ -478,11 +688,15 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
     {
         //short X = (short) event.getX();
         //short Y = (short) event.getY();
-        // 5) In event of touch on screen, the spaceship will relocate to the point of touch
         if(event.getAction() == MotionEvent.ACTION_DOWN)
         {
             switch (game_state_)
             {
+                case MENU:
+                {
+
+                }
+                break;
                 case PLAY:
                 {
                     AUDIO_SOUNDS.play(AUDIO_FLY, 2.0f, 2.0f, 0, 0, 1.0f);
@@ -496,12 +710,26 @@ public class gamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
                     }
                 }
                 break;
-                case DEATH: {
-                    Init();
+                case DEATH:
+                {
+
+                }
+                break;
+                case PAUSED:
+                {
+                    game_state_ = GAMESTATE.PLAY;
                 }
                 break;
             }
 
+            clickymouse_.position_.x_ = event.getX();
+            clickymouse_.position_.y_ = event.getY();
+
+        }
+        if(event.getAction() == MotionEvent.ACTION_UP)
+        {
+            clickymouse_.position_.x_ = 0;
+            clickymouse_.position_.y_ = 0;
         }
 
         return super.onTouchEvent(event);

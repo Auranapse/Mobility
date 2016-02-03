@@ -31,6 +31,9 @@ public class MainMenu extends Activity implements OnClickListener
 
         btn_help = (Button)findViewById(R.id.btn_help);
         btn_help.setOnClickListener(this);
+
+        Intent intent = new Intent();
+        intent.setClass(this, gameScene.class);
     }
 
     public void onClick(View v)

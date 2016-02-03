@@ -13,7 +13,7 @@ import android.view.WindowManager;
 public class splash extends Activity
 {
     protected boolean _active = true;
-    protected int _splashTime = 1000;
+    protected int _splashTime = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
